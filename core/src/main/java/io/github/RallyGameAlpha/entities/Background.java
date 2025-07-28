@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.github.RallyGameAlpha.RallyGame;
 import io.github.RallyGameAlpha.abc.Entity;
 
-public class Background extends Entity {
+public class Background implements Entity {
     Texture texture;
     Sprite sprite;
     FitViewport viewport;

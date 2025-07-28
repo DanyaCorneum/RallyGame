@@ -3,7 +3,7 @@ package io.github.RallyGameAlpha.entities;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import io.github.RallyGameAlpha.abc.Entity;
 
-public class Finish extends Entity {
+public class Finish implements Entity {
     @Override
     public void draw(SpriteBatch batch) {
 
