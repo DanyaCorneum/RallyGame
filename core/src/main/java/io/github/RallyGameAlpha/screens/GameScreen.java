@@ -1,29 +1,35 @@
 package io.github.RallyGameAlpha.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.Timer;
 import io.github.RallyGameAlpha.RallyGame;
-import io.github.RallyGameAlpha.abc.Entity;
+import io.github.RallyGameAlpha.entities.Finish;
 import io.github.RallyGameAlpha.entities.ObjectGame;
 import io.github.RallyGameAlpha.entities.Player;
 
 
-import java.util.ArrayList;
-
 public class GameScreen implements Screen {
     final RallyGame game;
+
     Player player;
     Sprite placeholder;
     Array<ObjectGame> objects;
     float delta;
-    float timer;
+    float timerObjects;
+    float gameTimer;
+    BitmapFont time;
+    float gameScore;
+    float length;
+    boolean gameGo;
+    Finish finish;
 
     public GameScreen(RallyGame game) {
         this.game = game;
@@ -32,6 +38,15 @@ public class GameScreen implements Screen {
         this.player = new Player(game.viewport);
         this.objects = new Array<>();
         delta = Gdx.graphics.getDeltaTime();
+        gameTimer = 100f;
+        length = 100f;
+        time = new BitmapFont();
+        time.setUseIntegerPositions(false);
+        time.getData().setScale(game.viewport.getWorldHeight() / Gdx.graphics.getHeight());
+        time.setColor(Color.BLACK);
+        gameGo = true;
+        finish = new Finish(game);
+        finish.sprite.setPosition(game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
     }
 
     private void createObject() {
@@ -62,33 +77,52 @@ public class GameScreen implements Screen {
     }
 
     public void logic() {
-        for (int i = objects.size - 1; i >= 0; i--) {
-            ObjectGame object = objects.get(i);
-            float width = object.sprite.getWidth();
-            float height = object.sprite.getHeight();
-            object.sprite.translateY(-object.speed * (float) Math.cos(Math.PI / 4.20));
-            object.sprite.translateX(-object.speed * (float) Math.cos(Math.PI / 3.20));
-            object.hitBox.set(object.sprite.getX(), object.sprite.getY(), width, height);
-            object.update(delta);
-
-            if (object.sprite.getY() < -height) {
-                objects.removeIndex(i);
-            } else if (player.hitBox.overlaps(object.hitBox) && object.id == 0) {
-                player.drawHit();
-                objects.removeIndex(i);
-
-            } else if (player.hitBox.overlaps(object.hitBox) && object.id == 1){
-                player.collect();
-                objects.removeIndex(i);
-            }
+        if (gameGo) {
+            gameTimer -= delta;
         }
+        length -= delta;
+        gameScore += 10;
+        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+            length -= delta * 2f;
+        } else if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+            length -= delta * 0.5f;
+        }
+        if (gameTimer > 0 && length > 0) {
+            if (length <= 7) {
+                finish.update(delta);
+                finish.sprite.translateY(-finish.speed * (float) Math.cos(Math.PI / 4.0));
+                finish.sprite.translateX(-finish.speed* (float) Math.cos(Math.PI / 4.50));
+            }
+            for (int i = objects.size - 1; i >= 0; i--) {
+                ObjectGame object = objects.get(i);
+                float width = object.sprite.getWidth();
+                float height = object.sprite.getHeight();
+                object.sprite.translateY(-object.speed * (float) Math.cos(Math.PI / 4.20));
+                object.sprite.translateX(-object.speed * (float) Math.cos(Math.PI / 3.20));
+                object.hitBox.set(object.sprite.getX(), object.sprite.getY(), width, height);
+                object.update(delta);
+
+                if (object.sprite.getY() < -height) {
+                    objects.removeIndex(i);
+                } else if (player.hitBox.overlaps(object.hitBox) && object.id == 0) {
+                    player.drawHit();
+                    objects.removeIndex(i);
+
+                } else if (player.hitBox.overlaps(object.hitBox) && object.id == 1) {
+                    player.collect();
+                    objects.removeIndex(i);
+                }
+            }
 
 
-        timer += delta;
-        if (timer > 1f) {
-            timer = 0;
-            createObject();
+            timerObjects += delta;
+            if (timerObjects > 1f) {
+                timerObjects = 0;
+                createObject();
 
+            }
+        } else {
+            gameGo = false;
         }
 
     }
@@ -98,10 +132,22 @@ public class GameScreen implements Screen {
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
         game.batch.begin();
-        placeholder.draw(game.batch);
-        player.draw(game.batch);
-        for (ObjectGame r : objects) {
-            r.draw(game.batch);
+        float textX = 1f; // 1 единица от левого края мира
+        float textY = game.viewport.getWorldHeight() - 1f; // 1 единица от верхнего края мира
+
+        if (gameTimer > 0 && length > 0) {
+            placeholder.draw(game.batch);
+            if (length <= 7) {
+                finish.draw(game.batch);
+            }
+            player.draw(game.batch);
+            for (ObjectGame r : objects) {
+                r.draw(game.batch);
+            }
+            time.draw(game.batch, "Time: " + (int) gameTimer, textX, textY);
+            time.draw(game.batch, "Length: " + (int) length, textX, textY + 0.5f);
+        } else {
+            time.draw(game.batch, "Your score:" + (int) (player.score + gameTimer * 19 / 24 - delta * 5), textX, textY);
         }
         game.batch.end();
     }
@@ -130,6 +176,6 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        time.dispose();
     }
 }

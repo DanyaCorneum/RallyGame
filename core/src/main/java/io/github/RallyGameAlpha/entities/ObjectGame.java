@@ -25,7 +25,7 @@ public class ObjectGame implements Entity {
     public ObjectGame(RallyGame game) {
         Gdx.app.log("rock", "okay");
         this.viewport = game.viewport;
-        if (MathUtils.random(1, 5) == 5) {
+        if (MathUtils.random(1, 10) - 4 > 0) {
 
             this.texture = new Texture(Gdx.files.internal("entities/rock.png"));
             id = 0;

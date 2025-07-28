@@ -51,7 +51,7 @@ public class Player implements Entity {
         sprite.draw(batch);
     }
 
-    public void drawHit(){
+    public void drawHit() {
         if (isHit) return;
 
         isHit = true;
@@ -69,7 +69,7 @@ public class Player implements Entity {
         Gdx.app.log("Player", String.valueOf(score));
     }
 
-    public void collect(){
+    public void collect() {
         if (isHit) return;
 
         isHit = true;
@@ -86,9 +86,11 @@ public class Player implements Entity {
         Gdx.app.log("Player", String.valueOf(score));
     }
 
+
     @Override
     public void update(float delta) {
-        hitBox.set(this.sprite.getX()*1.2f, this.sprite.getY() ,this.sprite.getWidth()*0.8f, this.sprite.getHeight()/2);
+
+        hitBox.set(this.sprite.getX() * 1.2f, this.sprite.getY(), this.sprite.getWidth() * 0.8f, this.sprite.getHeight() / 2);
         float worldWidth = viewport.getWorldWidth();
         float worldHeight = viewport.getWorldHeight();
         sprite.setX(MathUtils.clamp(sprite.getX(), 0.05f, worldWidth - sprite.getWidth() * 1.5f));
