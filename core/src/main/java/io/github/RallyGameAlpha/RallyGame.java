@@ -18,12 +18,16 @@ public class RallyGame extends Game {
     public void create() {
         batch = new SpriteBatch();
         font = new BitmapFont();
-        viewport = new FitViewport(10, 7);
+        viewport = new FitViewport(1280, 720);
 
         font.setUseIntegerPositions(false);
-        font.getData().setScale(viewport.getWorldHeight() / Gdx.graphics.getHeight());
+        font.getData().setScale(2f);
 
         this.setScreen(new MainMenuScreen(this));
+    }
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
     }
 
     @Override

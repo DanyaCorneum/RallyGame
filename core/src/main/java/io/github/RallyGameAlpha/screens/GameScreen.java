@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.RallyGameAlpha.RallyGame;
+import io.github.RallyGameAlpha.entities.Background;
 import io.github.RallyGameAlpha.entities.Finish;
 import io.github.RallyGameAlpha.entities.ObjectGame;
 import io.github.RallyGameAlpha.entities.Player;
@@ -19,8 +20,8 @@ import io.github.RallyGameAlpha.entities.Player;
 public class GameScreen implements Screen {
     final RallyGame game;
 
+    Background background;
     Player player;
-    Sprite placeholder;
     Array<ObjectGame> objects;
     float delta;
     float timerObjects;
@@ -33,17 +34,14 @@ public class GameScreen implements Screen {
 
     public GameScreen(RallyGame game) {
         this.game = game;
-        this.placeholder = new Sprite(new Texture(Gdx.files.internal("palceholder.png")));
-        this.placeholder.setSize(10, 8);
         this.player = new Player(game.viewport);
         this.objects = new Array<>();
+        this.background = new Background(game);
         delta = Gdx.graphics.getDeltaTime();
         gameTimer = 100f;
         length = 100f;
-        time = new BitmapFont();
-        time.setUseIntegerPositions(false);
-        time.getData().setScale(game.viewport.getWorldHeight() / Gdx.graphics.getHeight());
-        time.setColor(Color.BLACK);
+        time = game.font;
+        time.setColor(Color.WHITE);
         gameGo = true;
         finish = new Finish(game);
         finish.sprite.setPosition(game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
@@ -54,8 +52,8 @@ public class GameScreen implements Screen {
         float worldHeight = game.viewport.getWorldHeight();
 
         ObjectGame object = new ObjectGame(this.game);
-        object.sprite.setX(MathUtils.random(5f, worldWidth + 2));
-        object.sprite.setY(MathUtils.random(7f, worldHeight));
+        object.sprite.setX(MathUtils.random(700f, worldWidth + 2));
+        object.sprite.setY(MathUtils.random(700f, worldHeight));
         objects.add(object);
 
     }
@@ -88,17 +86,18 @@ public class GameScreen implements Screen {
             length -= delta * 0.5f;
         }
         if (gameTimer > 0 && length > 0) {
+            background.update(delta);
             if (length <= 7) {
                 finish.update(delta);
                 finish.sprite.translateY(-finish.speed * (float) Math.cos(Math.PI / 4.0));
-                finish.sprite.translateX(-finish.speed* (float) Math.cos(Math.PI / 4.50));
+                finish.sprite.translateX(-finish.speed * (float) Math.cos(Math.PI / 4.0));
             }
             for (int i = objects.size - 1; i >= 0; i--) {
                 ObjectGame object = objects.get(i);
                 float width = object.sprite.getWidth();
                 float height = object.sprite.getHeight();
-                object.sprite.translateY(-object.speed * (float) Math.cos(Math.PI / 4.20));
-                object.sprite.translateX(-object.speed * (float) Math.cos(Math.PI / 3.20));
+                object.sprite.translateY(-object.speed * (float) Math.cos(Math.PI / 8.20));
+                object.sprite.translateX(-object.speed * (float) Math.cos(Math.PI / 8.20));
                 object.hitBox.set(object.sprite.getX(), object.sprite.getY(), width, height);
                 object.update(delta);
 
@@ -123,36 +122,32 @@ public class GameScreen implements Screen {
             }
         } else {
             gameGo = false;
+            game.setScreen(new TableRecordsScreen(this.game, (int) gameScore));
         }
 
     }
 
     public void draw() {
-        ScreenUtils.clear(Color.GRAY);
+        ScreenUtils.clear(Color.BLACK);
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
         game.batch.begin();
-        float textX = 1f; // 1 единица от левого края мира
-        float textY = game.viewport.getWorldHeight() - 1f; // 1 единица от верхнего края мира
+        float textX = 0.1f; // 1 единица от левого края мира
+        float textY = game.viewport.getWorldHeight() - 0.5f; // 1 единица от верхнего края мира
 
-        if (gameTimer > 0 && length > 0) {
-            placeholder.draw(game.batch);
-            if (length <= 7) {
-                finish.draw(game.batch);
-            }
-            player.draw(game.batch);
-            for (ObjectGame r : objects) {
-                r.draw(game.batch);
-            }
-            time.draw(game.batch, "Time: " + (int) gameTimer, textX, textY);
-            time.draw(game.batch, "Length: " + (int) length, textX, textY + 0.5f);
-        } else {
-            time.draw(game.batch, "Your score:" + (int) (player.score + gameTimer * 19 / 24 - delta * 5), textX, textY);
+        background.draw(game.batch);
+        if (length <= 7) {
+            finish.draw(game.batch);
         }
+        player.draw(game.batch);
+        for (ObjectGame r : objects) {
+            r.draw(game.batch);
+        }
+        time.draw(game.batch, "Time: " + (int) gameTimer, textX, textY);
+        time.draw(game.batch, "Length: " + (int) length, textX, textY - 50f);
         game.batch.end();
-    }
 
-    ;
+    };
 
     @Override
     public void resize(int width, int height) {

@@ -20,11 +20,11 @@ public class Finish implements Entity {
     public float brakeSpeed;
 
     public Finish(RallyGame game){
-        texture = new Texture("finish.png");
+        texture = new Texture("entities/finish.png");
         sprite = new Sprite(texture);
         viewport = game.viewport;
         batch = game.batch;
-        sprite.setSize(20, 10);
+        sprite.setSize(200, 200);
         this.speed = 0.1f;
         this.trueSpeed = this.speed;
         this.boostSpeed = 0.15f;

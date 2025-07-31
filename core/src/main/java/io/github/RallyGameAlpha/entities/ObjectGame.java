@@ -28,18 +28,23 @@ public class ObjectGame implements Entity {
         if (MathUtils.random(1, 10) - 4 > 0) {
 
             this.texture = new Texture(Gdx.files.internal("entities/rock.png"));
+            this.sprite = new Sprite(texture);
+            float size = MathUtils.random(150, 250);
+            this.sprite.setSize(size, size);
             id = 0;
         } else {
             this.texture = new Texture(Gdx.files.internal("entities/star.png"));
+            this.sprite = new Sprite(texture);
+            this.sprite.setSize(100, 100);
             id = 1;
         }
-        this.sprite = new Sprite(texture);
+
         this.hitBox = new Rectangle();
-        this.sprite.setSize(1, 1);
-        this.speed = 0.1f;
+        this.sprite.setSize(sprite.getWidth(), sprite.getHeight());
+        this.speed = 5f;
         this.trueSpeed = this.speed;
-        this.boostSpeed = 0.15f;
-        this.brakeSpeed = 0.05f;
+        this.boostSpeed = 15f;
+        this.brakeSpeed = 2f;
     }
 
     @Override
