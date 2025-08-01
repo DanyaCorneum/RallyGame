@@ -15,6 +15,7 @@ import io.github.RallyGameAlpha.entities.Background;
 import io.github.RallyGameAlpha.entities.Finish;
 import io.github.RallyGameAlpha.entities.ObjectGame;
 import io.github.RallyGameAlpha.entities.Player;
+import io.github.RallyGameAlpha.utils.ScoreWriter;
 
 
 public class GameScreen implements Screen {
@@ -38,7 +39,7 @@ public class GameScreen implements Screen {
         this.objects = new Array<>();
         this.background = new Background(game);
         delta = Gdx.graphics.getDeltaTime();
-        gameTimer = 100f;
+        gameTimer = 10f;
         length = 100f;
         time = game.font;
         time.setColor(Color.WHITE);

@@ -4,10 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -21,11 +23,14 @@ public class MainMenuScreen implements Screen {
     private Stage stage;
     private Table table;
     private Skin skin;
+    Image background;
 
     final RallyGame game;
 
     public MainMenuScreen(RallyGame game) {
         this.game = game;
+        this.background = new Image(new Texture(Gdx.files.internal("background/background1.png")));
+        background.setFillParent(true);
         game.font.setColor(Color.WHITE);
 
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
@@ -55,6 +60,7 @@ public class MainMenuScreen implements Screen {
             }
         });
 
+        stage.addActor(background);
         stage.addActor(start);
         stage.addActor(tutorial);
         stage.addActor(tableOfRecords);
@@ -64,15 +70,15 @@ public class MainMenuScreen implements Screen {
         table.setFillParent(true);
         stage.addActor(table);
         //кнопки
-        table.add(start).padBottom(20f).width(200).height(100);
+        table.add(start).padBottom(20f).width(400).height(100);
         table.row();
 
-        table.add(tutorial).padBottom(20f).width(200).height(100);
+        table.add(tutorial).padBottom(20f).width(400).height(100);
         table.row();
 
-        table.add(tableOfRecords).padBottom(20f).width(200).height(100);
+        table.add(tableOfRecords).padBottom(20f).width(400).height(100);
         table.row();
-        table.setDebug(true);
+//        table.setDebug(true);
 
     }
 
@@ -87,6 +93,7 @@ public class MainMenuScreen implements Screen {
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
         game.batch.begin();
+
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();

@@ -113,10 +113,8 @@ public class Player implements Entity {
         timer += delta+.1f;
         if ((int)timer % 2 == 0){
             texture = texture1;
-            Gdx.app.log("player", "1");
         } else {
             texture = texture2;
-            Gdx.app.log("player", "2");
         }
 
 
