@@ -39,7 +39,7 @@ public class GameScreen implements Screen {
         this.objects = new Array<>();
         this.background = new Background(game);
         delta = Gdx.graphics.getDeltaTime();
-        gameTimer = 10f;
+        gameTimer = 100f;
         length = 100f;
         time = game.font;
         time.setColor(Color.WHITE);
@@ -145,7 +145,7 @@ public class GameScreen implements Screen {
             r.draw(game.batch);
         }
         time.draw(game.batch, "Time: " + (int) gameTimer, textX, textY);
-        time.draw(game.batch, "Length: " + (int) length, textX, textY - 50f);
+        time.draw(game.batch, "To finish: " + (int) length, textX, textY - 50f);
         game.batch.end();
 
     };

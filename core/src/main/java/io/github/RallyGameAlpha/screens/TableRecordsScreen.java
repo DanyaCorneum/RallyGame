@@ -50,11 +50,15 @@ public class TableRecordsScreen implements Screen {
 
         game.batch.begin();
         game.batch.draw(background, 0, 0, game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
-        game.font.draw(game.batch, "Your score \n " + this.currentScore + "\n", 560, 500);
-        for (int i = 0; i <= currentTable.size - 1 && i <= 4; i++) {
-            game.font.draw(game.batch, i + 1 + " " + " " + currentTable.get(i) + "\n", 560, 400 - i * 50);
+        game.font.draw(game.batch, "Your score \n " + this.currentScore + "\n", 560, 700);
+        for (int i = 0; i <= currentTable.size - 1 && i <= 15; i++) {
+            if (i < 7) {
+                game.font.draw(game.batch, i + 1 + " " + " " + currentTable.get(i) + "\n", 360, 600 - i * 50);
+            } else {
+                game.font.draw(game.batch, i + 1 + " " + " " + currentTable.get(i) + "\n", 660, 600 - (i-7) * 50);
+            }
         }
-        game.font.draw(game.batch, "Press escape for exit",500, 100);
+        game.font.draw(game.batch, "Press escape for exit", 500, 100);
         game.batch.end();
 
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
