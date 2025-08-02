@@ -31,6 +31,7 @@ public class Background implements Entity {
         for (Sprite layer : layers) {
             layer.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
         }
+        currentBg = layers.get(0);
 
 
     }

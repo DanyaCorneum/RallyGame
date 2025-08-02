@@ -24,7 +24,7 @@ public class Finish implements Entity {
         sprite = new Sprite(texture);
         viewport = game.viewport;
         batch = game.batch;
-        sprite.setSize(200, 200);
+        sprite.setSize(500, 500);
         this.speed = 0.1f;
         this.trueSpeed = this.speed;
         this.boostSpeed = 0.15f;

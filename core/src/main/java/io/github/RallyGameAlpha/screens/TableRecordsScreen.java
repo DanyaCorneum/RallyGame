@@ -3,6 +3,7 @@ package io.github.RallyGameAlpha.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -11,12 +12,14 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.github.RallyGameAlpha.RallyGame;
 import io.github.RallyGameAlpha.entities.Background;
+import io.github.RallyGameAlpha.utils.AppConfig;
 import io.github.RallyGameAlpha.utils.ScoreReader;
 import io.github.RallyGameAlpha.utils.ScoreWriter;
 
 public class TableRecordsScreen implements Screen {
     final RallyGame game;
 
+    Sound win;
     int currentScore;
     Array<Integer> currentTable;
     Texture background;
@@ -25,6 +28,7 @@ public class TableRecordsScreen implements Screen {
     public TableRecordsScreen(RallyGame game, Integer currentScore) {
         ScoreWriter.write(currentScore);
         String[] s = ScoreReader.read("data/tableOfRecords.txt");
+        AppConfig config = new AppConfig();
         this.currentTable = new Array<>();
         for (String i : s) {
             currentTable.add(Integer.valueOf(i));
@@ -35,6 +39,10 @@ public class TableRecordsScreen implements Screen {
         this.currentScore = currentScore;
         this.game = game;
         this.background = new Texture("background/win.png");
+        this.win = Gdx.audio.newSound(Gdx.files.internal("sounds/finish.wav"));
+        if (config.getMusic().equals("on")) {
+            win.play();
+        }
     }
 
 
@@ -51,11 +59,11 @@ public class TableRecordsScreen implements Screen {
         game.batch.begin();
         game.batch.draw(background, 0, 0, game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
         game.font.draw(game.batch, "Your score \n " + this.currentScore + "\n", 560, 700);
-        for (int i = 0; i <= currentTable.size - 1 && i <= 15; i++) {
+        for (int i = 0; i <= currentTable.size - 1 && i < 15; i++) {
             if (i < 7) {
                 game.font.draw(game.batch, i + 1 + " " + " " + currentTable.get(i) + "\n", 360, 600 - i * 50);
             } else {
-                game.font.draw(game.batch, i + 1 + " " + " " + currentTable.get(i) + "\n", 660, 600 - (i-7) * 50);
+                game.font.draw(game.batch, i + 1 + " " + " " + currentTable.get(i) + "\n", 660, 600 - (i - 7) * 50);
             }
         }
         game.font.draw(game.batch, "Press escape for exit", 500, 100);

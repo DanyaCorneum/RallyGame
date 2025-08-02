@@ -3,6 +3,8 @@ package io.github.RallyGameAlpha.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -15,12 +17,14 @@ import io.github.RallyGameAlpha.entities.Background;
 import io.github.RallyGameAlpha.entities.Finish;
 import io.github.RallyGameAlpha.entities.ObjectGame;
 import io.github.RallyGameAlpha.entities.Player;
+import io.github.RallyGameAlpha.utils.AppConfig;
 import io.github.RallyGameAlpha.utils.ScoreWriter;
 
 
 public class GameScreen implements Screen {
     final RallyGame game;
 
+    AppConfig config;
     Background background;
     Player player;
     Array<ObjectGame> objects;
@@ -32,20 +36,36 @@ public class GameScreen implements Screen {
     float length;
     boolean gameGo;
     Finish finish;
+    Music music;
+    float timeToStart;
 
     public GameScreen(RallyGame game) {
         this.game = game;
+        this.config = new AppConfig();
+
         this.player = new Player(game.viewport);
         this.objects = new Array<>();
         this.background = new Background(game);
         delta = Gdx.graphics.getDeltaTime();
-        gameTimer = 100f;
-        length = 100f;
+        if (config.getDifficulty().equals("normal")) {
+            gameTimer = 100f;
+            length = 150f;
+        } else {
+            gameTimer = 100f;
+            length = 200f;
+        }
         time = game.font;
         time.setColor(Color.WHITE);
         gameGo = true;
         finish = new Finish(game);
         finish.sprite.setPosition(game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
+        this.music = Gdx.audio.newMusic(Gdx.files.internal("sounds/rave.mp3"));
+        if (config.getMusic().equals("on")) {
+            music.setLooping(true);
+            music.setVolume(.5f);
+            music.play();
+        }
+        timeToStart = 5;
     }
 
     private void createObject() {
@@ -72,60 +92,71 @@ public class GameScreen implements Screen {
     }
 
     public void input() {
-        player.update(delta);
+        if (timeToStart < 0) {
+            if (length > 5) {
+                player.update(delta);
+            }
+        }
     }
 
     public void logic() {
-        if (gameGo) {
-            gameTimer -= delta;
-        }
-        length -= delta;
-        gameScore += 10;
-        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-            length -= delta * 2f;
-        } else if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-            length -= delta * 0.5f;
-        }
-        if (gameTimer > 0 && length > 0) {
-            background.update(delta);
-            if (length <= 7) {
+        if (timeToStart < 0) {
+            if (gameGo) {
+                gameTimer -= delta;
+            }
+            length -= delta;
+            gameScore += 10;
+            if (!player.isHit) {
+                if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+                    length -= delta * 2f;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+                    length -= delta * 0.5f;
+                }
+            }
+            if (gameTimer > 0 && length > 5) {
+                background.update(delta);
+                for (int i = objects.size - 1; i >= 0; i--) {
+                    ObjectGame object = objects.get(i);
+                    float width = object.sprite.getWidth();
+                    float height = object.sprite.getHeight();
+                    object.sprite.translateY(-object.speed * (float) Math.cos(Math.PI / 8.20));
+                    object.sprite.translateX(-object.speed * (float) Math.cos(Math.PI / 8.20));
+                    object.hitBox.set(object.sprite.getX(), object.sprite.getY(), width, height);
+                    if (!player.isHit) {
+                        object.update(delta);
+                    }
+                    if (object.sprite.getY() < -height) {
+                        objects.removeIndex(i);
+                    } else if (player.hitBox.overlaps(object.hitBox) && object.id == 0) {
+                        player.drawHit();
+                        objects.removeIndex(i);
+
+                    } else if (player.hitBox.overlaps(object.hitBox) && object.id == 1) {
+                        player.collect();
+                        objects.removeIndex(i);
+                    }
+                }
+                timerObjects += delta;
+                if (timerObjects > 1f) {
+                    timerObjects = 0;
+                    createObject();
+                }
+            } else if (length < 5 && length > 0) {
                 finish.update(delta);
                 finish.sprite.translateY(-finish.speed * (float) Math.cos(Math.PI / 4.0));
                 finish.sprite.translateX(-finish.speed * (float) Math.cos(Math.PI / 4.0));
-            }
-            for (int i = objects.size - 1; i >= 0; i--) {
-                ObjectGame object = objects.get(i);
-                float width = object.sprite.getWidth();
-                float height = object.sprite.getHeight();
-                object.sprite.translateY(-object.speed * (float) Math.cos(Math.PI / 8.20));
-                object.sprite.translateX(-object.speed * (float) Math.cos(Math.PI / 8.20));
-                object.hitBox.set(object.sprite.getX(), object.sprite.getY(), width, height);
-                object.update(delta);
+                objects.clear();
+                length -= delta*0.1f;
 
-                if (object.sprite.getY() < -height) {
-                    objects.removeIndex(i);
-                } else if (player.hitBox.overlaps(object.hitBox) && object.id == 0) {
-                    player.drawHit();
-                    objects.removeIndex(i);
-
-                } else if (player.hitBox.overlaps(object.hitBox) && object.id == 1) {
-                    player.collect();
-                    objects.removeIndex(i);
-                }
-            }
-
-
-            timerObjects += delta;
-            if (timerObjects > 1f) {
-                timerObjects = 0;
-                createObject();
-
+            } else {
+                gameGo = false;
+                game.setScreen(new TableRecordsScreen(this.game, (int) gameScore));
+                music.stop();
+                dispose();
             }
         } else {
-            gameGo = false;
-            game.setScreen(new TableRecordsScreen(this.game, (int) gameScore));
+            timeToStart -= delta;
         }
-
     }
 
     public void draw() {
@@ -137,18 +168,30 @@ public class GameScreen implements Screen {
         float textY = game.viewport.getWorldHeight() - 0.5f; // 1 единица от верхнего края мира
 
         background.draw(game.batch);
-        if (length <= 7) {
-            finish.draw(game.batch);
-        }
         player.draw(game.batch);
         for (ObjectGame r : objects) {
             r.draw(game.batch);
         }
+        if (length < 5) {
+            finish.draw(game.batch);
+            game.font.draw(game.batch, "FINISH", game.viewport.getWorldWidth() / 2 - game
+                .font.getScaleX(), game.viewport.getWorldHeight(
+            ) / 2 - game.font.getScaleY());
+        }
         time.draw(game.batch, "Time: " + (int) gameTimer, textX, textY);
         time.draw(game.batch, "To finish: " + (int) length, textX, textY - 50f);
+        if (timeToStart > 0) {
+            game.font.draw(game.batch, String.valueOf((int) timeToStart), game.viewport.getWorldWidth() / 2 - game
+                .font.getScaleX(), game.viewport.getWorldHeight(
+            ) / 2 - game.font.getScaleY());
+            game.font.draw(game.batch, "Press LeftShift for boost", 0.1f, 50);
+            game.font.draw(game.batch, "Press Space for brake", game.viewport.getWorldWidth() - 300, 50);
+        }
         game.batch.end();
 
-    };
+    }
+
+    ;
 
     @Override
     public void resize(int width, int height) {
@@ -172,6 +215,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        time.dispose();
+        player.dispose();
+        background.dispose();
     }
 }
