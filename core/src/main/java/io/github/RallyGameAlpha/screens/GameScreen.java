@@ -4,21 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.RallyGameAlpha.RallyGame;
 import io.github.RallyGameAlpha.entities.Background;
-import io.github.RallyGameAlpha.entities.Finish;
 import io.github.RallyGameAlpha.entities.ObjectGame;
 import io.github.RallyGameAlpha.entities.Player;
 import io.github.RallyGameAlpha.utils.AppConfig;
-import io.github.RallyGameAlpha.utils.ScoreWriter;
 
 
 public class GameScreen implements Screen {
@@ -35,9 +30,9 @@ public class GameScreen implements Screen {
     float gameScore;
     float length;
     boolean gameGo;
-    Finish finish;
     Music music;
     float timeToStart;
+    boolean pause;
 
     public GameScreen(RallyGame game) {
         this.game = game;
@@ -49,7 +44,7 @@ public class GameScreen implements Screen {
         delta = Gdx.graphics.getDeltaTime();
         if (config.getDifficulty().equals("normal")) {
             gameTimer = 100f;
-            length = 150f;
+            length = 100f;
         } else {
             gameTimer = 100f;
             length = 200f;
@@ -57,8 +52,6 @@ public class GameScreen implements Screen {
         time = game.font;
         time.setColor(Color.WHITE);
         gameGo = true;
-        finish = new Finish(game);
-        finish.sprite.setPosition(game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
         this.music = Gdx.audio.newMusic(Gdx.files.internal("sounds/rave.mp3"));
         if (config.getMusic().equals("on")) {
             music.setLooping(true);
@@ -66,6 +59,7 @@ public class GameScreen implements Screen {
             music.play();
         }
         timeToStart = 5;
+        pause = false;
     }
 
     private void createObject() {
@@ -93,6 +87,9 @@ public class GameScreen implements Screen {
 
     public void input() {
         if (timeToStart < 0) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+                pause = !pause;
+            }
             if (length > 5) {
                 player.update(delta);
             }
@@ -100,62 +97,66 @@ public class GameScreen implements Screen {
     }
 
     public void logic() {
-        if (timeToStart < 0) {
-            if (gameGo) {
-                gameTimer -= delta;
-            }
-            length -= delta;
-            gameScore += 10;
-            if (!player.isHit) {
-                if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-                    length -= delta * 2f;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-                    length -= delta * 0.5f;
+        if (!pause) {
+            if (timeToStart < 0) {
+                if (gameGo) {
+                    gameTimer -= delta;
                 }
-            }
-            if (gameTimer > 0 && length > 5) {
-                background.update(delta);
-                for (int i = objects.size - 1; i >= 0; i--) {
-                    ObjectGame object = objects.get(i);
-                    float width = object.sprite.getWidth();
-                    float height = object.sprite.getHeight();
-                    object.sprite.translateY(-object.speed * (float) Math.cos(Math.PI / 8.20));
-                    object.sprite.translateX(-object.speed * (float) Math.cos(Math.PI / 8.20));
-                    object.hitBox.set(object.sprite.getX(), object.sprite.getY(), width, height);
-                    if (!player.isHit) {
-                        object.update(delta);
-                    }
-                    if (object.sprite.getY() < -height) {
-                        objects.removeIndex(i);
-                    } else if (player.hitBox.overlaps(object.hitBox) && object.id == 0) {
-                        player.drawHit();
-                        objects.removeIndex(i);
-
-                    } else if (player.hitBox.overlaps(object.hitBox) && object.id == 1) {
-                        player.collect();
-                        objects.removeIndex(i);
+                length -= delta;
+                gameScore += 10;
+                if (!player.isHit) {
+                    if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+                        length -= delta * 2f;
+                    } else if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+                        length -= delta * 0.5f;
                     }
                 }
-                timerObjects += delta;
-                if (timerObjects > 1f) {
-                    timerObjects = 0;
-                    createObject();
-                }
-            } else if (length < 5 && length > 0) {
-                finish.update(delta);
-                finish.sprite.translateY(-finish.speed * (float) Math.cos(Math.PI / 4.0));
-                finish.sprite.translateX(-finish.speed * (float) Math.cos(Math.PI / 4.0));
-                objects.clear();
-                length -= delta*0.1f;
+                if (gameTimer > 0 && length > 5) {
+                    background.update(delta);
+                    for (int i = objects.size - 1; i >= 0; i--) {
+                        ObjectGame object = objects.get(i);
+                        float width = object.sprite.getWidth();
+                        float height = object.sprite.getHeight();
+                        object.sprite.translateY(-object.speed * (float) Math.cos(Math.PI / 8.20));
+                        object.sprite.translateX(-object.speed * (float) Math.cos(Math.PI / 8.20));
+                        object.hitBox.set(object.sprite.getX(), object.sprite.getY(), width, height);
+                        if (!player.isHit) {
+                            object.update(delta);
+                        }
+                        if (object.sprite.getY() < -height) {
+                            objects.removeIndex(i);
+                        } else if (player.hitBox.overlaps(object.hitBox) && object.id == 0) {
+                            player.drawHit();
+                            objects.removeIndex(i);
 
+                        } else if (player.hitBox.overlaps(object.hitBox) && object.id == 1) {
+                            player.collect();
+                            objects.removeIndex(i);
+                        }
+                    }
+                    timerObjects += delta;
+                    if (timerObjects > 1f) {
+                        timerObjects = 0;
+                        createObject();
+                    }
+                } else if (length < 5 && length > 0) {
+                    objects.clear();
+                    length -= delta * 0.01f;
+                    if (music.getVolume() - delta > 0) {
+
+                        music.setVolume(music.getVolume() - delta);
+                    }
+
+                } else {
+                    gameGo = false;
+                    game.music.play();
+                    game.setScreen(new TableRecordsScreen(this.game, (int) gameScore));
+                    music.stop();
+                    dispose();
+                }
             } else {
-                gameGo = false;
-                game.setScreen(new TableRecordsScreen(this.game, (int) gameScore));
-                music.stop();
-                dispose();
+                timeToStart -= delta;
             }
-        } else {
-            timeToStart -= delta;
         }
     }
 
@@ -168,18 +169,23 @@ public class GameScreen implements Screen {
         float textY = game.viewport.getWorldHeight() - 0.5f; // 1 единица от верхнего края мира
 
         background.draw(game.batch);
-        player.draw(game.batch);
-        for (ObjectGame r : objects) {
-            r.draw(game.batch);
+        if (!pause) {
+
+            player.draw(game.batch);
+            for (ObjectGame r : objects) {
+                r.draw(game.batch);
+            }
+        } else {
+            game.font.draw(game.batch, "Press Escape to exit from pause", 0.1f, 50);
         }
         if (length < 5) {
-            finish.draw(game.batch);
-            game.font.draw(game.batch, "FINISH", game.viewport.getWorldWidth() / 2 - game
-                .font.getScaleX(), game.viewport.getWorldHeight(
-            ) / 2 - game.font.getScaleY());
+            game.font.setColor(Color.RED);
+            game.font.draw(game.batch, "FINISH", game.viewport.getWorldWidth() / 2 - 50, game.viewport.getWorldHeight(
+            ) - 20);
+        } else {
+            time.draw(game.batch, "Time: " + (int) gameTimer, textX, textY);
+            time.draw(game.batch, "To finish: " + ((length - 5) > 0 ? (int) (length - 5) : 0), textX, textY - 50f);
         }
-        time.draw(game.batch, "Time: " + (int) gameTimer, textX, textY);
-        time.draw(game.batch, "To finish: " + (int) length, textX, textY - 50f);
         if (timeToStart > 0) {
             game.font.draw(game.batch, String.valueOf((int) timeToStart), game.viewport.getWorldWidth() / 2 - game
                 .font.getScaleX(), game.viewport.getWorldHeight(

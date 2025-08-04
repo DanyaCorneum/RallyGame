@@ -63,6 +63,15 @@ jar {
   dependencies {
     exclude('META-INF/INDEX.LIST', 'META-INF/maven/**')
   }
+  from('../core/assets') {
+    into 'assets'
+  }
+
+  // Убедитесь, что core модуль собран первым
+  dependsOn ':core:jar'
+
+  // Явно включаем выходные файлы core модуля
+  from(project(':core').sourceSets.main.output)
 // setting the manifest makes the JAR runnable.
   manifest {
     attributes 'Main-Class': project.mainClassName

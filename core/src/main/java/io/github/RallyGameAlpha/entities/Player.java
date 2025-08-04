@@ -127,7 +127,11 @@ public class Player implements Entity {
                 isCollect = false;
             }
         }, .5f);
-        score += 30;
+        if (config.getDifficulty().equals("hard")) {
+            score += 50;
+        } else {
+            score += 20;
+        }
         Gdx.app.log("Player", String.valueOf(score));
     }
 
@@ -166,7 +170,6 @@ public class Player implements Entity {
             }
             if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
                 speed = boostSpeed;
-                Gdx.app.log("hit", "all is good");
             } else if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
                 speed = brakeSpeed;
             } else {

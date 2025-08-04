@@ -1,23 +1,18 @@
 package io.github.RallyGameAlpha.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.FocusListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.RallyGameAlpha.RallyGame;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import io.github.RallyGameAlpha.utils.AppConfig;
 
 public class MainMenuScreen implements Screen {
@@ -29,14 +24,16 @@ public class MainMenuScreen implements Screen {
     final RallyGame game;
     Sound click;
 
+
     public MainMenuScreen(RallyGame game) {
         this.game = game;
         this.config = new AppConfig();
-        this.background = new Image(new Texture(Gdx.files.internal("background/background1.png")));
+        this.background = new Image(new Texture(Gdx.files.internal("mainMenu.jpg")));
         background.setFillParent(true);
         game.font.setColor(Color.WHITE);
         stage = new Stage(game.viewport);
         this.click = Gdx.audio.newSound(Gdx.files.internal("sounds/button.ogg"));
+
         initGUI();
     }
 
@@ -44,9 +41,14 @@ public class MainMenuScreen implements Screen {
         Skin skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
 
         final Label title = new Label("Rally game", skin);
+
+        final Label exit = new Label("Press Esc for exit", skin);
         title.setFontScale(2);
         title.setAlignment(5);
         title.setColor(Color.YELLOW);
+        exit.setFontScale(2);
+        exit.setAlignment(5);
+        exit.setColor(Color.YELLOW);
 
         this.start = new TextButton("Start", skin, "default");
         final TextButton tutorial = new TextButton("Tutorial", skin, "default");
@@ -58,19 +60,11 @@ public class MainMenuScreen implements Screen {
         tableOfRecords.getLabel().setFontScale(2);
         settings.getLabel().setFontScale(2);
 
+
         start.getColor().set(Color.GOLD);
         tutorial.getColor().set(Color.GOLD);
         tableOfRecords.getColor().set(Color.GOLD);
         settings.getColor().set(Color.GOLD);
-
-//
-//        start.addListener(new FocusListener() {
-//            @Override
-//            public boolean handle(Event event) {
-//                start.getColor().set(Color.GOLD);
-//                return super.handle(event);
-//            }
-//        });
         tutorial.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -87,6 +81,7 @@ public class MainMenuScreen implements Screen {
                 if (config.getSound().equals("on")) {
                     click.play();
                 }
+                game.music.stop();
                 game.setScreen(new GameScreen(game));
                 dispose();
             }
@@ -113,6 +108,7 @@ public class MainMenuScreen implements Screen {
         });
 
         stage.addActor(title);
+        stage.addActor(exit);
         stage.addActor(background);
         stage.addActor(start);
         stage.addActor(tutorial);
@@ -140,6 +136,8 @@ public class MainMenuScreen implements Screen {
 
         table.add(settings).padBottom(20f).width(400).height(100);
         table.row();
+        table.add(exit).padBottom(20f).width(400).height(100);
+        table.row();
     }
 
     @Override
@@ -157,6 +155,10 @@ public class MainMenuScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            Gdx.app.exit();
+            dispose();
+        }
 
         game.batch.end();
 

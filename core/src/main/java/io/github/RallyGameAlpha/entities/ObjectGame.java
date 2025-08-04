@@ -23,7 +23,6 @@ public class ObjectGame implements Entity {
     public int id;
 
     public ObjectGame(RallyGame game) {
-        Gdx.app.log("rock", "okay");
         this.viewport = game.viewport;
         if (MathUtils.random(1, 10) - 4 > 0) {
 

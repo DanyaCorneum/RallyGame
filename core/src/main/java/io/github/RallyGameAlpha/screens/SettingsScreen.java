@@ -36,7 +36,8 @@ public class SettingsScreen implements Screen {
         Skin skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
 
         final Label title = new Label("Settings", skin);
-        final TextButton screen = new TextButton("FullScreen: " + config.getFullScreen(), skin, "default");
+        final TextButton screen = new TextButton("FullScreen: " + (
+            config.getFullScreen().equals("true") ? "off" : "on"), skin, "default");
         final TextButton sound = new TextButton("Sound: " + config.getSound(), skin, "default");
         final TextButton music = new TextButton("Music: " + config.getMusic(), skin, "default");
         final TextButton difficulty = new TextButton("Difficulty: " + config.getDifficulty(), skin, "default");
@@ -58,14 +59,16 @@ public class SettingsScreen implements Screen {
                         click.play();
                     }
                     config.setFullScreen("false");
-                    screen.setText("FullScreen: " + config.getFullScreen());
+                    screen.setText("FullScreen: on");
                     Gdx.graphics.setWindowedMode(800, 500);
                 } else {
-                    click.play();
+                    if (config.getSound().equals("on")) {
+                        click.play();
+                    }
                     Graphics.DisplayMode displayMode = Gdx.graphics.getDisplayMode();
                     Gdx.graphics.setFullscreenMode(displayMode);
                     config.setFullScreen("true");
-                    screen.setText("FullScreen: " + config.getFullScreen());
+                    screen.setText("FullScreen: off");
                 }
             }
         });
@@ -73,7 +76,6 @@ public class SettingsScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (config.getSound().equals("on")) {
-
                     config.setSound("off");
                     sound.setText("Sound: " + config.getSound());
                     Gdx.app.log("sound", "sound is off");
@@ -94,6 +96,7 @@ public class SettingsScreen implements Screen {
                         click.play();
                     }
                     config.setMusic("off");
+                    game.music.stop();
                     music.setText("Music: " + config.getMusic());
                     Gdx.app.log("music", "music is off");
                 } else {
@@ -101,6 +104,7 @@ public class SettingsScreen implements Screen {
                         click.play();
                     }
                     config.setMusic("on");
+                    game.music.play();
                     music.setText("Music: " + config.getMusic());
                     Gdx.app.log("music", "music is on");
                 }

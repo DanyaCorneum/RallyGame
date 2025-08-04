@@ -2,17 +2,24 @@ package io.github.RallyGameAlpha;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.github.RallyGameAlpha.screens.MainMenuScreen;
+import io.github.RallyGameAlpha.utils.AppConfig;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
+/**
+ * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
+ */
 public class RallyGame extends Game {
 
     public SpriteBatch batch;
     public BitmapFont font;
     public FitViewport viewport;
+
+    public Music music;
+    AppConfig config;
 
     @Override
     public void create() {
@@ -23,8 +30,21 @@ public class RallyGame extends Game {
         font.setUseIntegerPositions(false);
         font.getData().setScale(2f);
 
+        this.music = Gdx.audio.newMusic(
+            Gdx.files.internal("sounds/main menu.mp3")
+        );
+        config = new AppConfig();
+        if (config.getMusic().equals("on")) {
+            music.setLooping(true);
+            music.setVolume(.5f);
+            music.play();
+            Gdx.app.log("music", "music starts");
+
+        }
+
         this.setScreen(new MainMenuScreen(this));
     }
+
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
