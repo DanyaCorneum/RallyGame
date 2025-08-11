@@ -37,7 +37,7 @@ public class SettingsScreen implements Screen {
 
         final Label title = new Label("Settings", skin);
         final TextButton screen = new TextButton("FullScreen: " + (
-            config.getFullScreen().equals("true") ? "off" : "on"), skin, "default");
+            config.getFullScreen().equals("true") ? "on" : "off"), skin, "default");
         final TextButton sound = new TextButton("Sound: " + config.getSound(), skin, "default");
         final TextButton music = new TextButton("Music: " + config.getMusic(), skin, "default");
         final TextButton difficulty = new TextButton("Difficulty: " + config.getDifficulty(), skin, "default");
@@ -59,7 +59,7 @@ public class SettingsScreen implements Screen {
                         click.play();
                     }
                     config.setFullScreen("false");
-                    screen.setText("FullScreen: on");
+                    screen.setText("FullScreen: off");
                     Gdx.graphics.setWindowedMode(800, 500);
                 } else {
                     if (config.getSound().equals("on")) {
@@ -68,7 +68,7 @@ public class SettingsScreen implements Screen {
                     Graphics.DisplayMode displayMode = Gdx.graphics.getDisplayMode();
                     Gdx.graphics.setFullscreenMode(displayMode);
                     config.setFullScreen("true");
-                    screen.setText("FullScreen: off");
+                    screen.setText("FullScreen: on");
                 }
             }
         });

@@ -13,9 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-/**
- * Launches the desktop (LWJGL3) application.
- */
+
 public class Lwjgl3Launcher {
     public static void main(String[] args) {
         if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS support and helps on Windows.
@@ -43,10 +41,6 @@ public class Lwjgl3Launcher {
                 System.out.println(configFile.readString().split("\n")[0]);
            }
 
-
-
-        //// You can change these files; they are in lwjgl3/src/main/resources/ .
-        //// They can also be loaded from the root of assets/ .
         configuration.setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png");
         return configuration;
     }

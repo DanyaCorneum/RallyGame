@@ -6,39 +6,51 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.RallyGameAlpha.RallyGame;
 import io.github.RallyGameAlpha.utils.AppConfig;
 import io.github.RallyGameAlpha.utils.ScoreReader;
 import io.github.RallyGameAlpha.utils.ScoreWriter;
 
+import java.util.*;
+
 public class TableRecordsScreen implements Screen {
     final RallyGame game;
 
     Sound win;
     int currentScore;
-    Array<Integer> currentTable;
+    HashMap<String, Integer> currentTable;
+    public List<Map.Entry<String, Integer>> entries;
     Texture background;
 
 
     public TableRecordsScreen(RallyGame game, Integer currentScore) {
         AppConfig config = new AppConfig();
+        Gdx.app.log("gasdfd", String.valueOf(currentScore));
         this.win = Gdx.audio.newSound(Gdx.files.internal("sounds/finish.wav"));
         if (currentScore != 0) {
-            ScoreWriter.write(currentScore);
+            ScoreWriter.write(currentScore, game);
             if (config.getMusic().equals("on")) {
                 win.play();
             }
         }
         String[] s = ScoreReader.read("data/tableOfRecords.txt");
-        this.currentTable = new Array<>();
+        this.currentTable = new HashMap<>();
         for (String i : s) {
-            currentTable.add(Integer.valueOf(i));
+            String key = i.split(" ")[0];
+            Integer item = Integer.valueOf(i.split(" ")[1]);
+            if (currentTable.containsKey(key)) {
+                if (item > currentTable.get(key)) {
+                    currentTable.put(key, item);
+                }
+            } else {
+                currentTable.put(key, item);
+            }
             Gdx.app.log("Score", i);
         }
-        currentTable.sort();
-        currentTable.reverse();
+        this.entries = new ArrayList<>(currentTable.entrySet());
+        entries.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
         this.currentScore = currentScore;
         this.game = game;
         this.background = new Texture("background/win.png");
@@ -59,18 +71,18 @@ public class TableRecordsScreen implements Screen {
         game.font.setColor(Color.WHITE);
         game.batch.draw(background, 0, 0, game.viewport.getWorldWidth(), game.viewport.getWorldHeight());
         game.font.draw(game.batch, "Your score \n " + this.currentScore + "\n", 560, 700);
-        for (int i = 0; i < currentTable.size && i < 15; ++i) {
+        for (int i = 0; i < entries.size() && i < 15; ++i) {
             if (i < 7) {
-                game.font.draw(game.batch, i + 1 + " " + " " + currentTable.get(i) + "\n", 360, 600 - i * 50);
+                game.font.draw(game.batch, i + 1 + " " + " " + entries.get(i).getKey() + " " + entries.get(i).getValue() + "\n", 360, 600 - i * 50);
 
             } else {
-                game.font.draw(game.batch, i + 1 + " " + " " + currentTable.get(i) + "\n", 660, 600 - (i - 7) * 50);
+                game.font.draw(game.batch, i + 1 + " " + " " + entries.get(i).getKey() + " " + entries.get(i).getValue() + "\n", 660, 600 - (i - 7) * 50);
             }
         }
         game.font.draw(game.batch, "Press escape for exit", 500, 100);
         game.batch.end();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             game.setScreen(new MainMenuScreen(game));
             dispose();
         }

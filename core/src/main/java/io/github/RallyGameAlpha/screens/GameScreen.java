@@ -88,7 +88,14 @@ public class GameScreen implements Screen {
     public void input() {
         if (timeToStart < 0) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+                music.pause();
                 pause = !pause;
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && pause) {
+                if (config.getMusic().equals("on")) {
+                    game.music.play();
+                }
+                game.setScreen(new MainMenuScreen(game));
             }
             if (length > 5) {
                 player.update(delta);
@@ -98,12 +105,14 @@ public class GameScreen implements Screen {
 
     public void logic() {
         if (!pause) {
+            if (config.getMusic().equals("on")) {
+                music.play();
+            }
             if (timeToStart < 0) {
                 if (gameGo) {
                     gameTimer -= delta;
                 }
                 length -= delta;
-                gameScore += 10;
                 if (!player.isHit) {
                     if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
                         length -= delta * 2f;
@@ -134,23 +143,38 @@ public class GameScreen implements Screen {
                             objects.removeIndex(i);
                         }
                     }
-                    timerObjects += delta;
-                    if (timerObjects > 1f) {
-                        timerObjects = 0;
-                        createObject();
+                    if (config.getDifficulty().equals("hard")) {
+                        timerObjects += delta;
+                        if (timerObjects > 1f) {
+                            timerObjects = 0;
+                            createObject();
+                        }
+                    } else {
+                        timerObjects += delta*0.5f;
+                        if (timerObjects > 1f) {
+                            timerObjects = 0;
+                            createObject();
+                        }
                     }
                 } else if (length < 5 && length > 0) {
                     objects.clear();
                     length -= delta * 0.01f;
                     if (music.getVolume() - delta > 0) {
-
                         music.setVolume(music.getVolume() - delta);
                     }
 
                 } else {
                     gameGo = false;
-                    game.music.play();
-                    game.setScreen(new TableRecordsScreen(this.game, (int) gameScore));
+                    if (config.getMusic().equals("on")) {
+                        game.music.play();
+                    }
+                    if (config.getDifficulty().equals("hard")) {
+                        game.setScreen(new TableRecordsScreen(this.game, (player.score + 100) * 2));
+
+                    } else {
+                        game.setScreen(new TableRecordsScreen(this.game, (player.score + 100)));
+
+                    }
                     music.stop();
                     dispose();
                 }
@@ -177,6 +201,7 @@ public class GameScreen implements Screen {
             }
         } else {
             game.font.draw(game.batch, "Press Escape to exit from pause", 0.1f, 50);
+            game.font.draw(game.batch, "Press Enter to exit from game", 0.1f, 100);
         }
         if (length < 5) {
             game.font.setColor(Color.RED);

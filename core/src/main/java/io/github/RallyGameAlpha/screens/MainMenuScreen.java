@@ -7,6 +7,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -54,17 +55,30 @@ public class MainMenuScreen implements Screen {
         final TextButton tutorial = new TextButton("Tutorial", skin, "default");
         final TextButton tableOfRecords = new TextButton("Table of records", skin, "default");
         final TextButton settings = new TextButton("Settings", skin, "default");
+        final TextButton profile = new TextButton("Profile", skin, "default");
 
         start.getLabel().setFontScale(2);
         tutorial.getLabel().setFontScale(2);
         tableOfRecords.getLabel().setFontScale(2);
         settings.getLabel().setFontScale(2);
+        profile.getLabel().setFontScale(2);
 
-
-        start.getColor().set(Color.GOLD);
-        tutorial.getColor().set(Color.GOLD);
-        tableOfRecords.getColor().set(Color.GOLD);
-        settings.getColor().set(Color.GOLD);
+        Color mainColor = new Color(new Color(0xF27A47ff));
+        start.getColor().set(mainColor);
+        tutorial.getColor().set(mainColor);
+        tableOfRecords.getColor().set(mainColor);
+        settings.getColor().set(mainColor);
+        profile.getColor().set(mainColor);
+        profile.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (config.getSound().equals("on")) {
+                    click.play();
+                }
+                game.setScreen(new ProfileScreen(game));
+                dispose();
+            }
+        });
         tutorial.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -114,6 +128,7 @@ public class MainMenuScreen implements Screen {
         stage.addActor(tutorial);
         stage.addActor(tableOfRecords);
         stage.addActor(settings);
+        stage.addActor(profile);
         Gdx.input.setInputProcessor(stage);
 
         Table table = new Table();
@@ -122,23 +137,26 @@ public class MainMenuScreen implements Screen {
 
         //кнопки
 
-        table.add(title).padBottom(20f).width(400).height(100);
+        table.add(title).padBottom(20f).width(250).height(100);
         table.row();
 
-        table.add(start).padBottom(20f).width(400).height(100);
+        table.add(start).padBottom(20f).width(300).height(100);
         table.row();
 
-        table.add(tutorial).padBottom(20f).width(400).height(100);
+        table.add(profile).padBottom(20f).width(300).height(100);
         table.row();
 
-        table.add(tableOfRecords).padBottom(20f).width(400).height(100);
+        table.add(tutorial).padBottom(20f).width(300).height(100);
         table.row();
 
-        table.add(settings).padBottom(20f).width(400).height(100);
+        table.add(tableOfRecords).padBottom(20f).width(300).height(100);
         table.row();
-        table.add(exit).padBottom(20f).width(400).height(100);
+
+        table.add(settings).padBottom(20f).width(300).height(100);
         table.row();
-    }
+        table.add(exit).padBottom(20f).width(300).height(100);
+        table.row();
+    } // инициализация интерфейса
 
     @Override
     public void show() {
@@ -155,14 +173,14 @@ public class MainMenuScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
+
+        game.batch.end();
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit();
             dispose();
         }
 
-        game.batch.end();
-
-    }
+    } // отрисовка интерфейса
 
     @Override
     public void resize(int width, int height) {
