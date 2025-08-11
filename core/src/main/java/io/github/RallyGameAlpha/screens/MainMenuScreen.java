@@ -1,17 +1,162 @@
 package io.github.RallyGameAlpha.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.RallyGameAlpha.RallyGame;
+import io.github.RallyGameAlpha.utils.AppConfig;
 
 public class MainMenuScreen implements Screen {
-    final RallyGame game;
+    private final Stage stage;
+    Image background;
+    AppConfig config;
+    TextButton start;
 
-    public MainMenuScreen(RallyGame game){
+    final RallyGame game;
+    Sound click;
+
+
+    public MainMenuScreen(RallyGame game) {
         this.game = game;
+        this.config = new AppConfig();
+        this.background = new Image(new Texture(Gdx.files.internal("mainMenu.jpg")));
+        background.setFillParent(true);
+        game.font.setColor(Color.WHITE);
+        stage = new Stage(game.viewport);
+        this.click = Gdx.audio.newSound(Gdx.files.internal("sounds/button.ogg"));
+
+        initGUI();
     }
+
+    public void initGUI() {
+        Skin skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
+
+        final Label title = new Label("Rally game", skin);
+
+        final Label exit = new Label("Press Esc for exit", skin);
+        title.setFontScale(2);
+        title.setAlignment(5);
+        title.setColor(Color.YELLOW);
+        exit.setFontScale(2);
+        exit.setAlignment(5);
+        exit.setColor(Color.YELLOW);
+
+        this.start = new TextButton("Start", skin, "default");
+        final TextButton tutorial = new TextButton("Tutorial", skin, "default");
+        final TextButton tableOfRecords = new TextButton("Table of records", skin, "default");
+        final TextButton settings = new TextButton("Settings", skin, "default");
+        final TextButton profile = new TextButton("Profile", skin, "default");
+
+        start.getLabel().setFontScale(2);
+        tutorial.getLabel().setFontScale(2);
+        tableOfRecords.getLabel().setFontScale(2);
+        settings.getLabel().setFontScale(2);
+        profile.getLabel().setFontScale(2);
+
+        Color mainColor = new Color(new Color(0xF27A47ff));
+        start.getColor().set(mainColor);
+        tutorial.getColor().set(mainColor);
+        tableOfRecords.getColor().set(mainColor);
+        settings.getColor().set(mainColor);
+        profile.getColor().set(mainColor);
+        profile.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (config.getSound().equals("on")) {
+                    click.play();
+                }
+                game.setScreen(new ProfileScreen(game));
+                dispose();
+            }
+        });
+        tutorial.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (config.getSound().equals("on")) {
+                    click.play();
+                }
+                game.setScreen(new TutorialScreen(game));
+                dispose();
+            }
+        });
+        start.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (config.getSound().equals("on")) {
+                    click.play();
+                }
+                game.music.stop();
+                game.setScreen(new GameScreen(game));
+                dispose();
+            }
+        });
+        tableOfRecords.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (config.getSound().equals("on")) {
+                    click.play();
+                }
+                game.setScreen(new TableRecordsScreen(game, 0));
+                dispose();
+            }
+        });
+        settings.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (config.getSound().equals("on")) {
+                    click.play();
+                }
+                game.setScreen(new SettingsScreen(game));
+                dispose();
+            }
+        });
+
+        stage.addActor(title);
+        stage.addActor(exit);
+        stage.addActor(background);
+        stage.addActor(start);
+        stage.addActor(tutorial);
+        stage.addActor(tableOfRecords);
+        stage.addActor(settings);
+        stage.addActor(profile);
+        Gdx.input.setInputProcessor(stage);
+
+        Table table = new Table();
+        table.setFillParent(true);
+        stage.addActor(table);
+
+        //кнопки
+
+        table.add(title).padBottom(20f).width(250).height(100);
+        table.row();
+
+        table.add(start).padBottom(20f).width(300).height(100);
+        table.row();
+
+        table.add(profile).padBottom(20f).width(300).height(100);
+        table.row();
+
+        table.add(tutorial).padBottom(20f).width(300).height(100);
+        table.row();
+
+        table.add(tableOfRecords).padBottom(20f).width(300).height(100);
+        table.row();
+
+        table.add(settings).padBottom(20f).width(300).height(100);
+        table.row();
+        table.add(exit).padBottom(20f).width(300).height(100);
+        table.row();
+    } // инициализация интерфейса
 
     @Override
     public void show() {
@@ -20,25 +165,26 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(Color.YELLOW);
-
+        ScreenUtils.clear(Color.BLACK);
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
         game.batch.begin();
 
-        game.font.draw(game.batch, "Welcome to Drop!!! ", 1, 1.5f);
-        game.font.draw(game.batch, "Tap anywhere to begin!", 1, 1);
-        game.batch.end();
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        stage.act(Gdx.graphics.getDeltaTime());
+        stage.draw();
 
-        if (Gdx.input.isTouched()){
-            game.setScreen(new GameScreen(game));
+        game.batch.end();
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            Gdx.app.exit();
             dispose();
         }
 
-    }
+    } // отрисовка интерфейса
 
     @Override
     public void resize(int width, int height) {
+        stage.setViewport(game.viewport);
 
     }
 
@@ -59,6 +205,6 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        stage.dispose();
     }
 }
